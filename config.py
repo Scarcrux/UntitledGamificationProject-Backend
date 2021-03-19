@@ -13,9 +13,9 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    OFFBRAND_MAIL_SUBJECT_PREFIX = '[Offbrand]'
-    OFFBRAND_MAIL_SENDER = 'Offbrand Admin <admin@offbrand.co>'
-    OFFBRAND_ADMIN = os.environ.get('OFFBRAND_ADMIN')
+    GAMIFICATION_MAIL_SUBJECT_PREFIX = '[Gamification]'
+    GAMIFICATION_MAIL_SENDER = 'Gamification Admin <admin@gamification.co>'
+    GAMIFICATION_ADMIN = os.environ.get('GAMIFICATION_ADMIN')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
 
