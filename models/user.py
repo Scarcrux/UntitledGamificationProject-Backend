@@ -6,14 +6,21 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 from flask_login import UserMixin, AnonymousUserMixin
 
-from ..app.extensions import db, login_manager
-from models.follower import follower
-from models.role import Role
+from app import db, login_manager
+from .follower import follower
+from .role import Role
 
+class Permission:
+    FOLLOW = 1
+    COMMENT = 2
+    WRITE = 4
+    MODERATE = 8
+    ADMIN = 16
 class User(db.Model, UserMixin):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
-    email = db.Column(db.String(120), index=True, unique=True)
+    email = db.Column(db.String(128), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     followed = db.relationship(
@@ -94,7 +101,7 @@ class AnonymousUser(AnonymousUserMixin):
     def is_administrator(self):
        return False
 
-@login_manager.anonymous_user = AnonymousUser
+login_manager.anonymous_user = AnonymousUser
 
 @login_manager.user_loader
 def load_user(user_id):

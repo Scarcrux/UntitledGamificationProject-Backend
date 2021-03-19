@@ -1,4 +1,4 @@
-from ..app.extensions import db
+from app import db
 
 follower = db.Table('follower',
     db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),

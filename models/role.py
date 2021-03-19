@@ -1,4 +1,4 @@
-from ..app.extensions import db, login_manager
+from app import db
 
 class Permission:
     FOLLOW = 1
