@@ -1,13 +1,11 @@
-from flask import Flask
-from config import Config
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 import logging
+from config import config
 from logging.handlers import SMTPHandler
 
 from flask import Flask
 from .extensions import bootstrap, db, moment, login_manager, mail
-from config import config
+
+from models.user import User
 
 def create_app(config_name):
     app = Flask(__name__)
@@ -20,6 +18,7 @@ def create_app(config_name):
     login_manager.init_app(app)
     mail.init_app(app)
 
+    # Blueprint for unauthorized routes
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
