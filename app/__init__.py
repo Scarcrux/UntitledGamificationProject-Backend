@@ -5,6 +5,17 @@ from logging.handlers import SMTPHandler
 from flask import Flask
 from .extensions import bootstrap, db, moment, login_manager, mail
 
+from models.achievement import Achievement
+from models.comment import Comment
+from models.conference import Conference
+from models.currency import Currency
+from models.hackathon import Hackathon
+from models.like import Like
+from models.post import Post
+from models.project import Project
+from models.reward import Reward
+from models.role import Role
+from models.tag import Tag
 from models.user import User
 
 def create_app(config_name):
