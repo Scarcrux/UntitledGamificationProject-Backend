@@ -5,7 +5,7 @@ class Reward(db.Model):
     __tablename__ = 'reward'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Integer)
-    description = db.column(db.String(128))
+    description = db.Column(db.String(128))
     cost = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 

@@ -8,6 +8,7 @@ from flask_login import UserMixin, AnonymousUserMixin
 
 from app import db, login_manager
 from .follower import follower
+from .post import Post
 from .role import Role
 
 class Permission:
@@ -19,35 +20,30 @@ class Permission:
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True, unique=True)
-    email = db.Column(db.String(128), index=True, unique=True)
+    id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.String(64), index = True, unique=True)
+    email = db.Column(db.String(128), index = True, unique = True)
     password_hash = db.Column(db.String(128))
-    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
-    currency = db.relationship("Currency", back_populates="user")
+    last_seen = db.Column(db.DateTime, default = datetime.utcnow)
+    post = db.relationship('Post', backref='author', lazy='dynamic')
     followed = db.relationship(
-      'User', secondary=follower,
-      primaryjoin=(follower.c.follower_id == id),
-      secondaryjoin=(follower.c.followed_id == id),
-      backref=db.backref('follower', lazy='dynamic'), lazy='dynamic')
+      'User', secondary = follower,
+      primaryjoin = (follower.c.follower_id == id),
+      secondaryjoin = (follower.c.followed_id == id),
+      backref = db.backref('follower', lazy = 'dynamic'), lazy = 'dynamic')
     avatar_hash = db.Column(db.String(32))
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role is None:
             if self.email == current_app.config['GAMIFICATION_ADMIN']:
-                self.role = Role.query.filter_by(name='Administrator').first()
+                self.role = Role.query.filter_by(name = 'Administrator').first()
             if self.role is None:
-                self.role = Role.query.filter_by(default=True).first()
+                self.role = Role.query.filter_by(default = True).first()
         if self.email is not None and self.avatar_hash is None:
             self.avatar_hash = self.gravatar_hash()
 
-    @property
-    def password(self):
-        raise AttributeError('password is not a readable attribute')
-
-    @password.setter
-    def password(self, password):
+    def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def verify_password(self, password):
@@ -60,11 +56,11 @@ class User(db.Model, UserMixin):
     def confirm(self, token):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
-              data = s.loads(token.encode('utf-8'))
+            data = s.loads(token.encode('utf-8'))
         except:
-              return False
+            return False
         if data.get('confirm') != self.id:
-              return False
+            return False
         self.confirmed = True
         db.session.add(self)
         return True
@@ -75,6 +71,13 @@ class User(db.Model, UserMixin):
 
     def gravatar_hash(self):
         return hashlib.md5(self.email.lower().encode('utf-8')).hexdigest()
+
+    def followed_posts(self):
+        followed = Post.query.join(
+            follower, (follower.c.followed_id == Post.user_id)).filter(
+                follower.c.follower_id == self.id)
+        own = Post.query.filter_by(user_id=self.id)
+        return followed.union(own).order_by(Post.timestamp.desc())
 
     def gravatar(self, size=100, default='identicon', rating='g'):
         url = 'https://secure.gravatar.com/avatar'

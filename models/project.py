@@ -5,7 +5,7 @@ from .tag_project import tag_project
 class Project(db.Model):
     __tablename__ = 'project'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.column(db.String(128))
+    title = db.Column(db.String(128))
     body = db.Column(db.String(256))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))

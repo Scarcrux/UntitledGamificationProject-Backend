@@ -4,7 +4,7 @@ from datetime import datetime
 class Comment(db.Model):
     __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.column(db.String(128))
+    title = db.Column(db.String(128))
     body = db.Column(db.String(256))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))

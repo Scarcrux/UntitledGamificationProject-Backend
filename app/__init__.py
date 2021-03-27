@@ -33,6 +33,7 @@ def create_app(config_name):
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
+    """
     # Send e-mail logs of production errors
     if not app.debug:
         if app.config['MAIL_SERVER']:
@@ -49,6 +50,6 @@ def create_app(config_name):
                 credentials=auth, secure=secure)
             mail_handler.setLevel(logging.ERROR)
             app.logger.addHandler(mail_handler)
-
+    """
     return app
 

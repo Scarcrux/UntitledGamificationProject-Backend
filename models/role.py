@@ -1,5 +1,5 @@
 from app import db
-
+from sqlalchemy import Column, Integer, ForeignKey
 class Permission:
     FOLLOW = 1
     COMMENT = 2
@@ -13,7 +13,8 @@ class Role(db.Model):
     name = db.Column(db.String(64), unique=True)
     default = db.Column(db.Boolean, default=False, index=True)
     permissions = db.Column(db.Integer)
-    users = db.relationship('User', backref='role', lazy='dynamic')
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = db.relationship("User", backref="role")
 
     def __init__(self, **kwargs):
         super(Role, self).__init__(**kwargs)
