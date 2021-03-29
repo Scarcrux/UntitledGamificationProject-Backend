@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+
 class Tag(db.Model):
     __tablename__ = 'tag'
     id = db.Column(db.Integer, primary_key=True)
