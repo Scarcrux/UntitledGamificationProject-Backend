@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import unittest
+
 from app import create_app, db
 from models.project import Project
 from models.tag import Tag
@@ -16,7 +17,7 @@ class UserModelCase(unittest.TestCase):
         db.drop_all()
 
     def test_tag(self):
-        u1 = Project(title='john', body='john@example.com')
+        u1 = Project(title='john', body='body 1')
         u2 = Tag(title='flask')
         db.session.add(u1)
         db.session.add(u2)
@@ -38,15 +39,15 @@ class UserModelCase(unittest.TestCase):
         self.assertEqual(u1.tags.count(), 0)
         self.assertEqual(u2.projects.count(), 0)
 
-    def test_tag_posts(self):
-        # create four projects
-        u1 = Project(title='john', body='john@example.com')
-        u2 = Project(title='susan', body='susan@example.com')
-        u3 = Project(title='mary', body='mary@example.com')
-        u4 = Project(title='david', body='david@example.com')
+    def test_tag_projects(self):
+        # Create four projects
+        u1 = Project(title='john', body='body 1')
+        u2 = Project(title='susan', body='body 2')
+        u3 = Project(title='mary', body='body 3')
+        u4 = Project(title='david', body='body 4')
         db.session.add_all([u1, u2, u3, u4])
 
-        # create four tags
+        # Create four tags
         p1 = Tag(title="a")
         p2 = Tag(title="b")
         p3 = Tag(title="c")
@@ -54,14 +55,14 @@ class UserModelCase(unittest.TestCase):
         db.session.add_all([p1, p2, p3, p4])
         db.session.commit()
 
-        # set up the tags
+        # Set up the tags
         u1.tag(p2)
         u1.tag(p4)
         u2.tag(p3)
         u3.tag(p4)
         db.session.commit()
 
-        # check the tags of each project
+        # Check the tags of each project
         f1 = u1.tags_projects().all()
         f2 = u2.tags_projects().all()
         f3 = u3.tags_projects().all()
