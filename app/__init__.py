@@ -33,7 +33,11 @@ def create_app(config_name):
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
+    # Blueprint for authorized routes
+    from .auth import auth as auth_blueprint
+    app.register_blueprint(auth_blueprint, url_prefix=’/auth’)
     """
+
     # Send e-mail logs of production errors
     if not app.debug:
         if app.config['MAIL_SERVER']:
