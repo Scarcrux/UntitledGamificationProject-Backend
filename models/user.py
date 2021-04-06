@@ -24,7 +24,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(64), index = True, unique=True)
     email = db.Column(db.String(128), index = True, unique = True)
     password_hash = db.Column(db.String(128))
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
     confirmed = db.Column(db.Boolean, default=False)
     last_seen = db.Column(db.DateTime, default = datetime.utcnow)
     post = db.relationship('Post', backref='author', lazy='dynamic')
@@ -45,7 +45,12 @@ class User(db.Model, UserMixin):
         if self.email is not None and self.avatar_hash is None:
             self.avatar_hash = self.gravatar_hash()
 
-    def set_password(self, password):
+    @property
+    def password(self):
+        raise AttributeError('password is not a readable attribute')
+
+    @password.setter
+    def password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def verify_password(self, password):
