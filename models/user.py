@@ -27,7 +27,7 @@ class User(db.Model, UserMixin):
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
     confirmed = db.Column(db.Boolean, default=False)
     name = db.Column(db.String(64))
-    member_since = db.Column(db.DateTime)
+    member_since = db.Column(db.DateTime, default = datetime.utcnow)
     last_seen = db.Column(db.DateTime, default = datetime.utcnow)
     about_me = db.Column(db.Text())
     post = db.relationship('Post', backref='author', lazy='dynamic')
