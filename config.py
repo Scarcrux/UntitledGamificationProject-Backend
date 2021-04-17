@@ -3,8 +3,12 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'secret')
-    STREAM_API_KEY = os.environ.get('STREAM_API_KEY')
+    PROPAGATE_EXCEPTIONS = True
+    JWT_BLACKLIST_ENABLED = True  # enable blacklist feature
+    JWT_BLACKLIST_TOKEN_CHECKS = [
+        "access",
+        "refresh",
+    ]  # allow blacklisting for access and refresh tokens
     STREAM_SECRET = os.environ.get('STREAM_SECRET')
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))

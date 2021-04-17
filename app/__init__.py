@@ -2,9 +2,11 @@ import logging
 from config import config
 from logging.handlers import SMTPHandler
 
-from flask import Flask
-from .extensions import bootstrap, db, moment, login_manager, mail
 
+from flask import Flask
+
+from .routes import api
+from .extensions import bootstrap, db, jwt, login_manager, mail, moment
 from models.achievement import Achievement
 from models.comment import Comment
 from models.conference import Conference
@@ -23,20 +25,20 @@ def create_app(config_name):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
+    api.init_app(app)
     bootstrap.init_app(app)
     db.init_app(app)
+    jwt.init_app(app)
     moment.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
 
-    # Blueprint for unauthorized routes
-    from .main import main as main_blueprint
-    app.register_blueprint(main_blueprint)
+    @app.before_first_request
+    def create_tables():
+        db.create_all()
 
-    # Blueprint for authorized routes
-    from .auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/auth')
     """
+
 
     # Send e-mail logs of production errors
     if not app.debug:
