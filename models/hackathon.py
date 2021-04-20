@@ -1,6 +1,6 @@
-from app import db
+from app.extensions import db
 
-class Hackathon(db.Model):
+class HackathonModel(db.Model):
     __tablename__ = "hackathon"
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(32))

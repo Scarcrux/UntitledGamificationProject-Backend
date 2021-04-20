@@ -1,20 +1,20 @@
-from app import db
+from app.extensions import db
 from datetime import datetime
 from .follower import follower
-from .tag import Tag
+from .tag import TagModel
 from .tag_project import tag_project
-class Project(db.Model):
+class ProjectModel(db.Model):
     __tablename__ = 'project'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128))
     body = db.Column(db.String(256))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    tags = db.relationship('Tag', secondary=tag_project,
+    tags = db.relationship('TagModel', secondary=tag_project,
         backref=db.backref('projects', lazy='dynamic'),lazy = 'dynamic')
 
     def tags_projects(self):
-        return Tag.query.join(tag_project).join(Project).filter(tag_project.c.project_id == self.id).order_by(Tag.title)
+        return TagModel.query.join(tag_project).join(ProjectModel).filter(tag_project.c.project_id == self.id).order_by(TagModel.title)
 
     def tag(self, tag):
         if not self.is_tagging(tag):

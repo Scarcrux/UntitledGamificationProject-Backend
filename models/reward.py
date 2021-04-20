@@ -1,7 +1,7 @@
-from app import db
+from app.extensions import db
 from datetime import datetime
 
-class Reward(db.Model):
+class RewardModel(db.Model):
     __tablename__ = 'reward'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Integer)

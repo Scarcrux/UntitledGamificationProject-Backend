@@ -1,6 +1,6 @@
-from app import db
+from app.extensions import db
 
-class Achievement(db.Model):
+class AchievementModel(db.Model):
     __tablename__ = "achievement"
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Integer)

@@ -1,7 +1,7 @@
-from app import db
+from app.extensions import db
 from datetime import datetime
 
-class Comment(db.Model):
+class CommentModel(db.Model):
     __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128))

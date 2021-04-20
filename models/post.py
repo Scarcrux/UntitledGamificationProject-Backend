@@ -1,7 +1,7 @@
-from app import db
+from app.extensions import db
 from datetime import datetime
 
-class Post(db.Model):
+class PostModel(db.Model):
     __tablename__ = 'post'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128))
