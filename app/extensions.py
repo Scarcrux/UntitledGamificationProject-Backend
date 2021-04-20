@@ -13,7 +13,7 @@ login_manager = LoginManager()
 mail = Mail()
 moment = Moment()
 
-@jwt.user_claims_loader
+@jwt.additional_claims_loader
 def add_claims_to_jwt(
     identity
 ):  # Remember identity is what we define when creating the access token
@@ -25,7 +25,7 @@ def add_claims_to_jwt(
 
 
 # This method will check if a token is blacklisted, and will be called automatically when blacklist is enabled
-@jwt.token_in_blacklist_loader
+@jwt.token_in_blocklist_loader
 def check_if_token_in_blacklist(decrypted_token):
     return (
         decrypted_token["jti"] in BLACKLIST

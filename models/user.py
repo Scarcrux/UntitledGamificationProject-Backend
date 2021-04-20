@@ -6,10 +6,10 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 from flask_login import UserMixin, AnonymousUserMixin
 
-from app import db, login_manager
+from app.extensions import db, login_manager
 from .follower import follower
-from .post import Post
-from .role import Role
+from .post import PostModel
+from .role import RoleModel
 
 class Permission:
     FOLLOW = 1
@@ -18,11 +18,12 @@ class Permission:
     MODERATE = 8
     ADMIN = 16
 
-class User(db.Model, UserMixin):
+class UserModel(db.Model, UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(64), index = True, unique=True)
     email = db.Column(db.String(128), index = True, unique = True)
+    password = db.Column(db.String(64))
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
     confirmed = db.Column(db.Boolean, default=False)
@@ -30,14 +31,19 @@ class User(db.Model, UserMixin):
     member_since = db.Column(db.DateTime, default = datetime.utcnow)
     last_seen = db.Column(db.DateTime, default = datetime.utcnow)
     about_me = db.Column(db.Text())
-    post = db.relationship('Post', backref='author', lazy='dynamic')
+    post = db.relationship('PostModel', backref='author', lazy='dynamic')
     followed = db.relationship(
-      'User', secondary = follower,
+      'UserModel', secondary = follower,
       primaryjoin = (follower.c.follower_id == id),
       secondaryjoin = (follower.c.followed_id == id),
       backref = db.backref('follower', lazy = 'dynamic'), lazy = 'dynamic')
     avatar_hash = db.Column(db.String(32))
 
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+    """
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role is None:
@@ -47,7 +53,27 @@ class User(db.Model, UserMixin):
                 self.role = Role.query.filter_by(default = True).first()
         if self.email is not None and self.avatar_hash is None:
             self.avatar_hash = self.gravatar_hash()
+    """
+    def json(self):
+        return {"id": self.id, "username": self.username}
 
+    @classmethod
+    def find_by_username(cls, username):
+        return cls.query.filter_by(username=username).first()
+
+    @classmethod
+    def find_by_id(cls, _id):
+        return cls.query.filter_by(id=_id).first()
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    """
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')
@@ -70,7 +96,7 @@ class User(db.Model, UserMixin):
                data = s.loads(token.encode('utf-8'))
         except:
               return False
-        user = User.query.get(data.get('reset'))
+        user = UserModel.query.get(data.get('reset'))
         if user is None:
               return False
         user.password = new_password
@@ -124,10 +150,10 @@ class User(db.Model, UserMixin):
         return hashlib.md5(self.email.lower().encode('utf-8')).hexdigest()
 
     def followed_posts(self):
-        followed = Post.query.join(
+        followed = PostModel.query.join(
             follower, (follower.c.followed_id == Post.user_id)).filter(
                 follower.c.follower_id == self.id)
-        own = Post.query.filter_by(user_id=self.id)
+        own = PostModel.query.filter_by(user_id=self.id)
         return followed.union(own).order_by(Post.timestamp.desc())
 
     def gravatar(self, size=100, default='identicon', rating='g'):
@@ -167,4 +193,5 @@ login_manager.anonymous_user = AnonymousUser
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return UserModel.query.get(int(user_id))
+    """

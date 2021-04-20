@@ -1,15 +1,17 @@
 import os
 from flask_migrate import Migrate, upgrade
-from app import create_app, db
-from models.user import User, Permission
-from models.role import Role
+from app import create_app
+from app.extensions import db
+from models.user import UserModel, Permission
+from models.role import RoleModel
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 migrate = Migrate(app, db)
 
+
 @app.shell_context_processor
 def make_shell_context():
-    return dict(db=db, User=User, Role=Role,
+    return dict(db=db, User=UserModel, Role=UserModel,
                 Permission=Permission)
 
 @app.cli.command()
@@ -19,7 +21,7 @@ def deploy():
     upgrade()
 
     # create or update user roles
-    Role.insert_roles()
+    RoleModel.insert_roles()
 
 @app.cli.command()
 def test():

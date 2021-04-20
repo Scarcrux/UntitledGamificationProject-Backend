@@ -7,18 +7,21 @@ from flask import Flask
 
 from .routes import api
 from .extensions import bootstrap, db, jwt, login_manager, mail, moment
-from models.achievement import Achievement
-from models.comment import Comment
-from models.conference import Conference
-from models.currency import Currency
-from models.hackathon import Hackathon
-from models.like import Like
-from models.post import Post
-from models.project import Project
-from models.reward import Reward
-from models.role import Role
-from models.tag import Tag
-from models.user import User
+
+
+from models.achievement import AchievementModel
+from models.comment import CommentModel
+from models.conference import ConferenceModel
+from models.currency import CurrencyModel
+from models.hackathon import HackathonModel
+from models.like import LikeModel
+from models.post import PostModel
+from models.project import ProjectModel
+from models.reward import RewardModel
+from models.role import RoleModel
+from models.tag import TagModel
+from models.user import UserModel
+
 
 def create_app(config_name):
     app = Flask(__name__)
@@ -36,8 +39,8 @@ def create_app(config_name):
     @app.before_first_request
     def create_tables():
         db.create_all()
-
     """
+
 
 
     # Send e-mail logs of production errors
