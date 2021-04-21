@@ -17,7 +17,7 @@ CREATED_SUCCESSFULLY = "User created successfully."
 USER_NOT_FOUND = "User not found."
 USER_DELETED = "User deleted."
 INVALID_CREDENTIALS = "Invalid credentials!"
-USER_LOGGED_OUT = "User <id={user_id}> successfully logged out."
+USER_LOGGED_OUT = "User <id={}> successfully logged out."
 
 _user_parser = reqparse.RequestParser()
 _user_parser.add_argument(
@@ -57,7 +57,7 @@ class User(Resource):
         if not user:
             return {"message": USER_NOT_FOUND}, 404
         user.delete_from_db()
-        return {"message": "User deleted."}, 200
+        return {"message": USER_DELETED}, 200
 
 
 class UserLogin(Resource):

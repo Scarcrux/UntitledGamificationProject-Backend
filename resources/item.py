@@ -77,12 +77,16 @@ class Item(Resource):
 
         return item.json(), 200
 
-
+class ItemList(Resource):
+    @classmethod
+    def get(cls):
+        return {"items": [item.json() for item in ItemModel.find_all()]}, 200
+"""
 class ItemList(Resource):
     @classmethod
     @jwt_required(optional=True)
     def get(cls):
-        """
+
         Here we get the JWT identity, and then if the user is logged in (we were able to get an identity)
         we return the entire item list.
 
@@ -90,7 +94,7 @@ class ItemList(Resource):
 
         This could be done with e.g. see orders that have been placed, but not see details about the orders
         unless the user has logged in.
-        """
+
         user_id = get_jwt_identity()
         items = [item.json() for item in ItemModel.find_all()]
         if user_id:
@@ -102,3 +106,4 @@ class ItemList(Resource):
             },
             200,
         )
+"""

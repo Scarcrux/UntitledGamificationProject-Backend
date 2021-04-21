@@ -62,6 +62,10 @@ class UserModel(db.Model, UserMixin):
         return cls.query.filter_by(username=username).first()
 
     @classmethod
+    def find_by_email(cls, email: str) -> "UserModel":
+        return cls.query.filter_by(email=email).first()
+
+    @classmethod
     def find_by_id(cls, _id):
         return cls.query.filter_by(id=_id).first()
 
