@@ -9,6 +9,7 @@ class Config:
         "access",
         "refresh",
     ]  # allow blacklisting for access and refresh tokens
+   # JWT_ACCESS_TOKEN_EXPIRES = os.environ.get('ACCESS_EXPIRES')
     JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY')
     STREAM_SECRET = os.environ.get('STREAM_SECRET')
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
