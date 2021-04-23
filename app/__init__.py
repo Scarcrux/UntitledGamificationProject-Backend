@@ -20,6 +20,7 @@ from models.project import ProjectModel
 from models.reward import RewardModel
 from models.role import RoleModel
 from models.tag import TagModel
+from models.tokenblocklist import TokenBlocklist
 from models.user import UserModel
 
 
@@ -36,6 +37,12 @@ def create_app(config_name):
     login_manager.init_app(app)
     mail.init_app(app)
 
+    # Callback function to check if a JWT exists in the database blocklist
+    @jwt.token_in_blocklist_loader
+    def check_if_token_revoked(jwt_header, jwt_payload):
+        jti = jwt_payload["jti"]
+        token = db.session.query(TokenBlocklist.id).filter_by(jti=jti).scalar()
+        return token is not None
     @app.before_first_request
     def create_tables():
         db.create_all()
