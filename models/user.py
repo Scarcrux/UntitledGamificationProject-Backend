@@ -54,8 +54,6 @@ class UserModel(db.Model, UserMixin):
         if self.email is not None and self.avatar_hash is None:
             self.avatar_hash = self.gravatar_hash()
     """
-    def json(self):
-        return {"id": self.id, "username": self.username}
 
     @classmethod
     def find_by_username(cls, username):
@@ -77,6 +75,23 @@ class UserModel(db.Model, UserMixin):
         db.session.delete(self)
         db.session.commit()
 
+    @classmethod
+    def return_all(cls):
+        def to_json(x):
+            return {
+                'username': x.username,
+                'password': x.password
+            }
+        return {'users': list(map(lambda x: to_json(x), UserModel.query.all()))}
+
+    @classmethod
+    def delete_all(cls):
+        try:
+            num_rows_deleted = db.session.query(cls).delete()
+            db.session.commit()
+            return {'message': '{} row(s) deleted'.format(num_rows_deleted)}
+        except:
+            return {'message': 'Something went wrong'}
     """
     @property
     def password(self):
