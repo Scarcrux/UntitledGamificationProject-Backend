@@ -6,7 +6,7 @@ from logging.handlers import SMTPHandler
 from flask import Flask
 
 from .routes import api
-from .extensions import bootstrap, db, jwt, login_manager, mail, moment
+from .extensions import bootstrap, db, jwt, login_manager, ma, mail, moment
 
 
 from models.achievement import AchievementModel
@@ -33,9 +33,10 @@ def create_app(config_name):
     bootstrap.init_app(app)
     db.init_app(app)
     jwt.init_app(app)
-    moment.init_app(app)
     login_manager.init_app(app)
+    ma.init_app(app)
     mail.init_app(app)
+    moment.init_app(app)
 
     # Callback function to check if a JWT exists in the database blocklist
     @jwt.token_in_blocklist_loader

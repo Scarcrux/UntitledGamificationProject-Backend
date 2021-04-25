@@ -21,9 +21,9 @@ class Permission:
 class UserModel(db.Model, UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String(64), index = True, unique=True)
+    username = db.Column(db.String(64), index = True, unique=True, nullable=False)
     email = db.Column(db.String(128), index = True, unique = True)
-    password = db.Column(db.String(64))
+    password = db.Column(db.String(64), nullable=False)
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
     confirmed = db.Column(db.Boolean, default=False)
@@ -38,10 +38,6 @@ class UserModel(db.Model, UserMixin):
       secondaryjoin = (follower.c.followed_id == id),
       backref = db.backref('follower', lazy = 'dynamic'), lazy = 'dynamic')
     avatar_hash = db.Column(db.String(32))
-
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
 
     """
     def __init__(self, **kwargs):
