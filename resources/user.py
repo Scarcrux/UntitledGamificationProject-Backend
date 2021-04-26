@@ -4,15 +4,13 @@ from werkzeug.security import safe_str_cmp
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
-    #jwt_refresh_token_required,
     get_jwt_identity,
     jwt_required,
-    get_jwt,
+    get_jwt
 )
 from models.user import UserModel
 from blacklist import BLACKLIST
 from models.tokenblocklist import TokenBlocklist
-from flask import jsonify
 from datetime import datetime
 from datetime import timezone
 from app.extensions import db
@@ -26,29 +24,24 @@ USER_NOT_FOUND = "User not found."
 USER_DELETED = "User deleted."
 INVALID_CREDENTIALS = "Invalid credentials!"
 USER_LOGGED_OUT = "User <id={}> successfully logged out."
+NOT_CONFIRMED_ERROR = "You have not confirmed registration, please check e-mail."
 
 user_schema = UserSchema()
 
 class UserRegister(Resource):
     @classmethod
     def post(cls):
-        try:
-            user_data = user_schema.load(request.get_json())
+        user_json = request.get_json()
+        user = user_schema.load(user_json)
 
-        except ValidationError as err:
-                return err.messages, 400
-
-        if UserModel.find_by_username(user_data["username"]):
+        if UserModel.find_by_username(user.username):
             return {"message": USER_ALREADY_EXISTS}, 400
 
-        user = UserModel(**user_data)
         user.save_to_db()
 
         return {"message": CREATED_SUCCESSFULLY}, 201
 
-
 class User(Resource):
-
     @classmethod
     def get(cls, user_id: int):
         user = UserModel.find_by_id(user_id)
@@ -68,25 +61,22 @@ class User(Resource):
 class UserLogin(Resource):
     @classmethod
     def post(cls):
-        try:
-            user_data = user_schema.load(request.get_json())
+        user_json = request.get_json()
+        user_data = user_schema.load(user_json)
 
-        except ValidationError as err:
-                return err.messages, 400
+        user = UserModel.find_by_username(user_data.username)
 
-        user = UserModel.find_by_username(user_data["username"])
-
-        # this is what the `authenticate()` function did in security.py
-        if user and safe_str_cmp(user.password, user_data["password"]):
-            # identity= is what the identity() function did in security.py—now stored in the JWT
-            access_token = create_access_token(identity=user.id, fresh=True)
-            refresh_token = create_refresh_token(user.id)
-            return {"access_token": access_token, "refresh_token": refresh_token}, 200
+        if user and safe_str_cmp(user_data.password, user.password):
+            if user.confirmed:
+                access_token = create_access_token(identity=user.id, fresh=True)
+                refresh_token = create_refresh_token(user.id)
+                return {"access_token": access_token, "refresh_token": refresh_token}, 200
+            return {"message": NOT_CONFIRMED_ERROR.format(user.username)}, 400
 
         return {"message": INVALID_CREDENTIALS}, 401
 
 
-class UserLogout(Resource):
+class Confirmation(Resource):
     @classmethod
     @jwt_required()
     def post(cls):
@@ -110,3 +100,25 @@ class TokenRefresh(Resource):
         current_user = get_jwt_identity()
         new_token = create_access_token(identity=current_user, fresh=False)
         return {"access_token": new_token}, 200
+
+
+@auth.route('/confirm/<token>')
+@login_required
+def confirm(token):
+    if current_user.confirmed:
+        return redirect(url_for('main.index'))
+    if current_user.confirm(token):
+        db.session.commit()
+        flash('You have confirmed your account. Thanks!')
+    else:
+        flash('The confirmation link is invalid or has expired.')
+    return redirect(url_for('main.index'))
+
+@auth.route('/confirm')
+@login_required
+def resend_confirmation():
+    token = current_user.generate_confirmation_token()
+    send_email(current_user.email, 'Confirm Your Account',
+               'auth/email/confirm', user=current_user, token=token)
+    flash('A new confirmation email has been sent to you by email.')
+    return redirect(url_for('main.index'))

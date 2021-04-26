@@ -1,13 +1,10 @@
 import logging
 from config import config
 from logging.handlers import SMTPHandler
-
-
-from flask import Flask
-
+from marshmallow import ValidationError
+from flask import Flask, jsonify
 from .routes import api
 from .extensions import bootstrap, db, jwt, login_manager, ma, mail, moment
-
 
 from models.achievement import AchievementModel
 from models.comment import CommentModel
@@ -44,6 +41,11 @@ def create_app(config_name):
         jti = jwt_payload["jti"]
         token = db.session.query(TokenBlocklist.id).filter_by(jti=jti).scalar()
         return token is not None
+
+    @app.errorhandler(ValidationError)
+    def handle_marshmallow_validation(err):
+            return jsonify(err.messages), 400
+
     @app.before_first_request
     def create_tables():
         db.create_all()
