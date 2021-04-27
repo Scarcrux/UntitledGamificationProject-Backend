@@ -4,13 +4,14 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     PROPAGATE_EXCEPTIONS = True
-    JWT_BLACKLIST_ENABLED = True  # enable blacklist feature
+
     JWT_BLACKLIST_TOKEN_CHECKS = [
         "access",
         "refresh",
     ]  # allow blacklisting for access and refresh tokens
    # JWT_ACCESS_TOKEN_EXPIRES = os.environ.get('ACCESS_EXPIRES')
     JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY')
+    SECRET_KEY=os.environ.get('SECRET_KEY')
     STREAM_SECRET = os.environ.get('STREAM_SECRET')
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
