@@ -44,7 +44,7 @@ def create_app(config_name):
 
     @app.errorhandler(ValidationError)
     def handle_marshmallow_validation(err):
-            return jsonify(err.messages), 400
+        return jsonify(err.messages), 400
 
     @app.before_first_request
     def create_tables():

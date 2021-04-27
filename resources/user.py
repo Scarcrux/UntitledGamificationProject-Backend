@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from flask import request
+from flask import request, render_template, make_response
 from werkzeug.security import safe_str_cmp
 from flask_jwt_extended import (
     create_access_token,
@@ -9,13 +9,13 @@ from flask_jwt_extended import (
     get_jwt
 )
 from models.user import UserModel
-from blacklist import BLACKLIST
 from models.tokenblocklist import TokenBlocklist
 from datetime import datetime
 from datetime import timezone
 from app.extensions import db
 from schemas.user import UserSchema
 from marshmallow import ValidationError
+from app.email import send_email
 
 BLANK_ERROR = "'{}' cannot be blank."
 USER_ALREADY_EXISTS = "A user with that username already exists."
@@ -25,6 +25,7 @@ USER_DELETED = "User deleted."
 INVALID_CREDENTIALS = "Invalid credentials!"
 USER_LOGGED_OUT = "User <id={}> successfully logged out."
 NOT_CONFIRMED_ERROR = "You have not confirmed registration, please check e-mail."
+USER_CONFIRMED = "User confirmed."
 
 user_schema = UserSchema()
 
@@ -76,7 +77,7 @@ class UserLogin(Resource):
         return {"message": INVALID_CREDENTIALS}, 401
 
 
-class Confirmation(Resource):
+class UserLogout(Resource):
     @classmethod
     @jwt_required()
     def post(cls):
@@ -101,7 +102,36 @@ class TokenRefresh(Resource):
         new_token = create_access_token(identity=current_user, fresh=False)
         return {"access_token": new_token}, 200
 
+class ConfirmToken(Resource):
+    @classmethod
+    def get(cls, user_id):
+        user = UserModel.find_by_id(user_id)
+        if not user:
+            return {"message": USER_NOT_FOUND}, 404
 
+        user.confirmed = True
+        user.save_to_db()
+        #return {"message": USER_CONFIRMED}, 200
+        # return redirect("http://localhost:3000/", code=302)  # redirect if we have a separate web app
+        headers = {"Content-Type": "text/html"}
+        return make_response(
+            render_template("confirmation_page.html", email=user.username), 200, headers
+        )
+
+class Confirm(Resource):
+    @jwt_required()
+    def get(cls):
+        user_id = get_jwt_identity()
+        print(user_id)
+        current_user = UserModel.find_by_id(user_id)
+        print(current_user)
+        if not current_user:
+            return {"message": USER_NOT_FOUND}, 404
+        token = current_user.generate_confirmation_token()
+        send_email(current_user.email, 'Confirm Your Account',
+               'auth/email/confirm_user', user=current_user, token=token)
+        return {"message": 'A new confirmation email has been sent to you by email.'}, 200
+"""
 @auth.route('/confirm/<token>')
 @login_required
 def confirm(token):
@@ -114,11 +144,5 @@ def confirm(token):
         flash('The confirmation link is invalid or has expired.')
     return redirect(url_for('main.index'))
 
-@auth.route('/confirm')
-@login_required
-def resend_confirmation():
-    token = current_user.generate_confirmation_token()
-    send_email(current_user.email, 'Confirm Your Account',
-               'auth/email/confirm', user=current_user, token=token)
-    flash('A new confirmation email has been sent to you by email.')
-    return redirect(url_for('main.index'))
+
+"""
