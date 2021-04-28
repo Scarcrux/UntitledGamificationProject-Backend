@@ -104,19 +104,31 @@ class TokenRefresh(Resource):
 
 class ConfirmToken(Resource):
     @classmethod
-    def get(cls, user_id):
+    @jwt_required()
+    def get(cls, token):
+        print (token)
+        user_id = get_jwt_identity()
+        print(user_id)
         user = UserModel.find_by_id(user_id)
         if not user:
             return {"message": USER_NOT_FOUND}, 404
 
-        user.confirmed = True
-        user.save_to_db()
+        #if user.confirmed:
+            headers = {"Content-Type": "text/html"}
+            return make_response(
+            render_template("confirmation_page.html", email=user.username), 200, headers)
+
+        if user.confirm(token):
+            user.confirmed = True
+            user.save_to_db()
+            headers = {"Content-Type": "text/html"}
+            return make_response(
+            render_template("confirmation_page.html", email=user.username), 200, headers)
+
+        #else:
+        return {"message": 'The confirmation link is invalid or has expired.'}, 401
         #return {"message": USER_CONFIRMED}, 200
         # return redirect("http://localhost:3000/", code=302)  # redirect if we have a separate web app
-        headers = {"Content-Type": "text/html"}
-        return make_response(
-            render_template("confirmation_page.html", email=user.username), 200, headers
-        )
 
 class Confirm(Resource):
     @jwt_required()
@@ -143,6 +155,4 @@ def confirm(token):
     else:
         flash('The confirmation link is invalid or has expired.')
     return redirect(url_for('main.index'))
-
-
 """
