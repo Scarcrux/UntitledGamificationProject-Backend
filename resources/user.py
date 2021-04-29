@@ -8,13 +8,13 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt
 )
-from models.user import UserModel
-from models.tokenblocklist import TokenBlocklist
 from datetime import datetime
 from datetime import timezone
+
+from models.user import UserModel
+from models.tokenblocklist import TokenBlocklist
 from app.extensions import db
 from schemas.user import UserSchema
-from marshmallow import ValidationError
 from app.email import send_email
 
 BLANK_ERROR = "'{}' cannot be blank."
@@ -87,11 +87,6 @@ class UserLogout(Resource):
         db.session.add(TokenBlocklist(jti=jti, created_at=now))
         db.session.commit()
         return {"message": USER_LOGGED_OUT.format(user_id)}, 200
-    #def post(cls):
-    #    jti = get_jwt()["jti"]  # jti is "JWT ID", a unique identifier for a JWT.
-    #    user_id = get_jwt_identity()
-    #    BLACKLIST.add(jti)
-    #
 
 
 class TokenRefresh(Resource):
@@ -167,21 +162,3 @@ class ResetPassword(Resource):
             db.session.commit()
             return {"message": 'Your password has been updated.'}, 200
         return {"message": 'Token is invalid or expired.'}, 404
-
-"""
-
-
-@auth.route('/reset/<token>', methods=['GET', 'POST'])
-def password_reset(token):
-    if not current_user.is_anonymous:
-        return redirect(url_for('main.index'))
-    form = PasswordResetForm()
-    if form.validate_on_submit():
-        if User.reset_password(token, form.password.data):
-            db.session.commit()
-            flash('Your password has been updated.')
-            return redirect(url_for('auth.login'))
-        else:
-            return redirect(url_for('main.index'))
-    return render_template('auth/reset_password.html', form=form)
-"""
