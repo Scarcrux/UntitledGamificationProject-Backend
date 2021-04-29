@@ -131,6 +131,7 @@ class ConfirmToken(Resource):
         # return redirect("http://localhost:3000/", code=302)  # redirect if we have a separate web app
 
 class Confirm(Resource):
+    @classmethod
     @jwt_required()
     def get(cls):
         user_id = get_jwt_identity()
@@ -143,16 +144,44 @@ class Confirm(Resource):
         send_email(current_user.email, 'Confirm Your Account',
                'auth/email/confirm_user', user=current_user, token=token)
         return {"message": 'A new confirmation email has been sent to you by email.'}, 200
+
+class Reset(Resource):
+    @classmethod
+    def get(cls):
+        user_json = request.get_json()
+        user = UserModel.query.filter_by(email = user_json['email']).first()
+        print(user)
+        if user:
+            token = user.generate_reset_token()
+            send_email(user.email, 'Reset Your Password',
+                       'auth/email/reset_password',
+                       user=user, token=token)
+            return {"message": 'A reset password email has been sent to you.'}, 200
+        return {"message": 'Cannot find email address.'}, 404
+
+class ResetPassword(Resource):
+    @classmethod
+    def post(cls, token):
+        user_json = request.get_json()
+        if UserModel.reset_password(token, user_json['password']):
+            db.session.commit()
+            return {"message": 'Your password has been updated.'}, 200
+        return {"message": 'Token is invalid or expired.'}, 404
+
 """
-@auth.route('/confirm/<token>')
-@login_required
-def confirm(token):
-    if current_user.confirmed:
+
+
+@auth.route('/reset/<token>', methods=['GET', 'POST'])
+def password_reset(token):
+    if not current_user.is_anonymous:
         return redirect(url_for('main.index'))
-    if current_user.confirm(token):
-        db.session.commit()
-        flash('You have confirmed your account. Thanks!')
-    else:
-        flash('The confirmation link is invalid or has expired.')
-    return redirect(url_for('main.index'))
+    form = PasswordResetForm()
+    if form.validate_on_submit():
+        if User.reset_password(token, form.password.data):
+            db.session.commit()
+            flash('Your password has been updated.')
+            return redirect(url_for('auth.login'))
+        else:
+            return redirect(url_for('main.index'))
+    return render_template('auth/reset_password.html', form=form)
 """
