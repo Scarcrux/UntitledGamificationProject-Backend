@@ -1,11 +1,13 @@
 from flask_restful import Api
 
-from resources.user import UserRegister, UserLogin, User, TokenRefresh, UserLogout, ConfirmToken, Confirm, Reset, ResetPassword
+from resources.user import UserRegister, UserLogin, User, TokenRefresh, UserLogout, ConfirmToken, Confirm, Reset, ResetPassword, Follow, Unfollow
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
 
 api = Api()
 
+api.add_resource(Unfollow, "/unfollow/<int:user_id>")
+api.add_resource(Follow, "/follow/<int:user_id>")
 api.add_resource(Confirm, "/confirm")
 api.add_resource(ConfirmToken, "/confirm/<string:token>", endpoint="confirmtoken")
 api.add_resource(Reset, "/reset")
