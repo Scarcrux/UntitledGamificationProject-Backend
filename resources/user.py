@@ -162,3 +162,34 @@ class ResetPassword(Resource):
             db.session.commit()
             return {"message": 'Your password has been updated.'}, 200
         return {"message": 'Token is invalid or expired.'}, 404
+
+
+class Follow(Resource):
+    @classmethod
+    @jwt_required()
+    def post(cls, user_id):
+        current_user_id = get_jwt_identity()
+        if current_user_id == user_id:
+            return {"message": "You cannot follow yourself."}, 404
+        current_user = UserModel.find_by_id(current_user_id)
+        followed_user = UserModel.find_by_id(user_id)
+        if not current_user or not followed_user:
+            return {"message": USER_NOT_FOUND}, 404
+        current_user.follow(followed_user)
+        db.session.commit()
+        return {"message": 'User followed.'}, 200
+
+class Unfollow(Resource):
+    @classmethod
+    @jwt_required()
+    def post(cls, user_id):
+        current_user_id = get_jwt_identity()
+        if current_user_id == user_id:
+            return {"message": "You cannot unfollow yourself."}, 404
+        current_user = UserModel.find_by_id(current_user_id)
+        followed_user = UserModel.find_by_id(user_id)
+        if not current_user or not followed_user:
+            return {"message": USER_NOT_FOUND}, 404
+        current_user.unfollow(followed_user)
+        db.session.commit()
+        return {"message": 'User unfollowed.'}, 200
