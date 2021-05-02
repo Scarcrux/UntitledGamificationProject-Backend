@@ -1,6 +1,6 @@
 from app.extensions import ma
 from models.user import UserModel
-from marshmallow import Schema, fields
+from marshmallow import fields, Schema
 
 class UserSchema(Schema):
     username = fields.String()
@@ -13,6 +13,7 @@ class UserSchema(Schema):
     #friends = fields.List(fields.Nested(lambda: UserSchema()))
 
 """
+class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserModel
         load_only = ("password",)
