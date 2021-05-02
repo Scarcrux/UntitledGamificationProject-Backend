@@ -3,6 +3,7 @@ from datetime import datetime
 from .follower import follower
 from .tag import TagModel
 from .tag_project import tag_project
+from typing import List
 class ProjectModel(db.Model):
     __tablename__ = 'project'
     id = db.Column(db.Integer, primary_key=True)
@@ -15,6 +16,34 @@ class ProjectModel(db.Model):
 
     def tags_projects(self):
         return TagModel.query.join(tag_project).join(ProjectModel).filter(tag_project.c.project_id == self.id).order_by(TagModel.title)
+
+    #@classmethod
+    #def find_by_username(cls, username):
+    #    return cls.query.filter_by(username=username).first()
+
+    #@classmethod
+    #def find_by_title(cls, email: str) -> "ProjectModel":
+    #    return cls.query.filter_by(email=email).first()
+
+    @classmethod
+    def find_by_name(cls, name: str) -> "ProjectModel":
+        return cls.query.filter_by(name=name).first()
+
+    @classmethod
+    def find_all(cls) -> List["ProjectModel"]:
+        return cls.query.all()
+
+    @classmethod
+    def find_by_id(cls, _id):
+        return cls.query.filter_by(id=_id).first()
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
 
     def tag(self, tag):
         if not self.is_tagging(tag):
