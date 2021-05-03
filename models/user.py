@@ -10,6 +10,8 @@ from app.extensions import db, login_manager
 from .follower import follower
 from .post import PostModel
 from .role import RoleModel
+from .like import LikeModel
+from .favorite import FavoriteModel
 
 class Permission:
     FOLLOW = 1
@@ -37,6 +39,14 @@ class UserModel(db.Model, UserMixin):
       primaryjoin = (follower.c.follower_id == id),
       secondaryjoin = (follower.c.followed_id == id),
       backref = db.backref('follower', lazy = 'dynamic'), lazy = 'dynamic')
+    favorited = db.relationship(
+      'FavoriteModel', secondary = FavoriteModel,
+      primaryjoin = (FavoriteModel.c.user_id == id),
+      backref = db.backref('favorite', lazy = 'dynamic'), lazy = 'dynamic')
+    liked = db.relationship(
+      'LikeModel', secondary = LikeModel,
+      primaryjoin = (LikeModel.c.user_id == id),
+      backref = db.backref('like', lazy = 'dynamic'), lazy = 'dynamic')
     avatar_hash = db.Column(db.String(32))
 
     """
