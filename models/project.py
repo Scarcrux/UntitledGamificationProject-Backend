@@ -11,9 +11,8 @@ class ProjectModel(db.Model):
     body = db.Column(db.String(256))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    tags = db.relationship('TagModel', secondary=tag_project,
-        backref=db.backref('projects', lazy='dynamic'),lazy = 'dynamic')
-    favorites = db.relationship('FavoriteModel', backref = 'favorite_projects', lazy = 'dynamic')
+    tags = db.relationship("Tag", secondary=tag_project, lazy = 'dynamic')
+    favorites = db.relationship('FavoriteModel', backref = 'project', lazy = 'dynamic')
 
     def tags_projects(self):
         return TagModel.query.join(tag_project).join(ProjectModel).filter(tag_project.c.project_id == self.id).order_by(TagModel.title)
