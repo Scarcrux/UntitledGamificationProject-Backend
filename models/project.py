@@ -13,6 +13,7 @@ class ProjectModel(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     tags = db.relationship('TagModel', secondary=tag_project,
         backref=db.backref('projects', lazy='dynamic'),lazy = 'dynamic')
+    favorites = db.relationship('FavoriteModel', backref = 'favorite_projects', lazy = 'dynamic')
 
     def tags_projects(self):
         return TagModel.query.join(tag_project).join(ProjectModel).filter(tag_project.c.project_id == self.id).order_by(TagModel.title)

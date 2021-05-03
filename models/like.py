@@ -4,7 +4,7 @@ from datetime import datetime
 class LikeModel(db.Model):
     __tablename__ = 'like'
     id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     @classmethod
